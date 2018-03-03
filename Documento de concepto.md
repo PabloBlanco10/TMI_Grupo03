@@ -38,6 +38,8 @@ Se proporcionará al usuario cierta información acerca de cada película:
 En la interfaz gráfica del teclado se añadirán diferentes botones descriptivos para navegar a través de la información recibida. Por ejemplo, si se selecciona una película existirán varios 
 botones personalizados que actuarán como comandos.
 
+![Boceto Ejemplo](https://github.com/PabloBlanco10/TMI_Grupo03/blob/master/Boceto.jpg).
+
 A continuación, se detallarán los distintos comandos de los que podrás disponer en la aplicación:
 
  * **Buscar cine:** Busca la cartelera de un cine elegido.
