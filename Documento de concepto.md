@@ -77,7 +77,7 @@ Según la complejidad de la implementación se pretenden implementar varias func
 
 ### Referencias:
 
-https://www.ecartelera.com
-Canal de Telegram https://t.me/estrenoscine
+* https://www.ecartelera.com
+* Canal de Telegram https://t.me/estrenoscine
 
 
