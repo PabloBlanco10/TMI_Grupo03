@@ -1,13 +1,13 @@
 ########################################################
 #################### TELEGRAM BOT ######################
 ################ CINEBOT - @CICINEBOT ##################
-## UCM - MÁSTER INGENIERÍA INFORMÁTICA - TMI - GRUPO 3 #
+## UCM - MASTER INGENIERIA INFORMATICA - TMI - GRUPO 3 #
 ########################################################
 
 ##################### AUTORES ##########################
-############## Andrés Aguirre Juárez ###################
+############## Andres Aguirre Juarez ###################
 ############### Pablo Blanco Peris #####################
-############# María Castañeda López ####################
+############# Maria Castañeda Lopez ####################
 ############### Maurizio Vittorini #####################
 ########################################################
 
@@ -20,9 +20,11 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
+TOKEN = '581607975:AAG995XceTIs5DjdW70blkjF3__IGCKv2_w'  # @CicinebotPablo_bot
+TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
+TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM'  # @CicinebotMaurizio_bot
 
-
-#función que gestiona los mensajes recibidos por el chat
+#funcion que gestiona los mensajes recibidos por el chat
 def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     mensaje = msg['text']
@@ -39,7 +41,7 @@ def on_chat_message(msg):
         bot.sendMessage(chat_id, 'Prueba con el botón del chat', reply_markup=keyboard)
 
 
-#función que gestiona los botones inchat
+#funcion que gestiona los botones inchat
 def on_callback_query(msg):
     query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
     # print('Callback Query catch')
