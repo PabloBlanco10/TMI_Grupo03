@@ -1,0 +1,22 @@
+El archivo ecartelera.py obtiene información de los cines listados en el fichero "cinesMadrid.txt". Esta lista la he extraído de la página de ecartelera, y solo lista los cines activos. 
+
+De cada cine, guarda en una base de datos las películas y los pases que tiene cada película en ese cine. Solo funciona con el día actual.
+
+Para que funcione, hay que tener creada la base de datos, y tener acceso a ella. Los datos de la configuración se gestionan en el primer método.
+
+Para importar una base de datos en MySQL:
+	- mysql -u root -p cinebot <  cinebot_db.sql
+
+Puede ser que funcione sin -p.
+
+Para exportar la base de datos:
+	- mysqldump -u root cinebot > cinebot_db.sql
+
+La base de datos tiene tres tablas. 
+
+Cine ( nombre, enlace , coordenadaX, coordenadaY) 
+Pelicula ( nombre )
+Pases (nombreCine , nombrePelicula, hora)
+
+nombreCine de la tabla Pases hace referencia a nombre de la tabla Cine.
+nombrePelicula de la tabla Pases hace referencia a enlace de la tabla Pelicula.
