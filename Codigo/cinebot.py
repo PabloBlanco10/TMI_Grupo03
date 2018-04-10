@@ -14,7 +14,7 @@
 
 import sys
 import time
-import urllib2
+import urllib3
 
 import telepot
 from telepot.loop import MessageLoop
@@ -33,8 +33,6 @@ TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM' # @cicinebotmaurizio
 def on_notify_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     mensaje = msg['text']
-
-
 
 
 
@@ -60,8 +58,6 @@ def build_buttons(list, callback_key, n_cols, header_buttons=None, footer_button
 
 
 
-
-
 #funcion que gestiona los mensajes recibidos por el chat
 
 class UserHandler(telepot.helper.ChatHandler):
@@ -75,34 +71,23 @@ class UserHandler(telepot.helper.ChatHandler):
         mensaje = msg['text']
         print(mensaje)
 
-        if '/start' in mensaje:
+        if mensaje == '/start':
 
-            optionList = ['Yes', 'No']
+            optionList = ['Si', 'No']
 
-            #keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            #    [InlineKeyboardButton(text='Yes', callback_data='StartSi')],
-            #    [InlineKeyboardButton(text='No', callback_data='StartNo')],
-            #])
+            bot.sendMessage(chat_id, 'Buenas, soy CineBot, ¿te apetece ir al cine? 📽🎞🍿🥤🎬', reply_markup=build_buttons(optionList, 'start' , 2))
 
-
-            #bot.sendMessage(chat_id, 'Quieres ir al cine?', reply_markup=keyboard)
-
-            bot.sendMessage(chat_id, 'Quieres ir al cine?', reply_markup=build_buttons(optionList, 'start' , 2))
+            #bot.sendAudio(chat_id=chat_id, audio=open('start.mp3', 'rb'))
 
 
-            bot.sendAudio(chat_id=chat_id, audio=open('start.mp3', 'rb'))
-
-
-
-
-        elif '/buscarCine' in mensaje:
+        elif mensaje == '/buscarCine':
 
             #aqui va la funcion que busca en la base de datos los cines
 
-            cineList = ['cine1', 'cine2', 'cine3', 'cine4']
+            cineList = ['Yelmo Cines Plenilunio', 'Yelmo Cines Islazul', 'Cinesa Príncipe Pío 3D', 'La Vaguada']
 
             #envia lista de cines
-            bot.sendMessage(chat_id, 'Donde quieres ir?', reply_markup=build_buttons(cineList, 'cine', 2))
+            bot.sendMessage(chat_id, '¿A qué cine te apetece ir?', reply_markup=build_buttons(cineList, 'cine', 2))
 
 
 
@@ -110,13 +95,14 @@ class UserHandler(telepot.helper.ChatHandler):
 
             peli = mensaje.split('/buscarPelicula')
 
-            print peli
+            #print peli
 
             # aqui va la funcion que busca en la base de datos peli[1] y return a lista de cine
 
             found = True
 
             cineList = ['cine1', 'cine2', 'cine3', 'cine4']
+
 
             if found:
                 bot.sendMessage(chat_id, 'Found it!')
@@ -130,29 +116,24 @@ class UserHandler(telepot.helper.ChatHandler):
                 bot.sendPhoto(chat_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
 
 
-        elif '/cineCercano' in mensaje:
+        elif mensaje == '/cineCercano':
 
             #recuperar la posicion del usuario
             #recuperar los cines mas cercano en la base de datos y ponerlos en una lista (cineList)
 
             cineList = ['cine1', 'cine2', 'cine3', 'cine4']
-
             bot.sendMessage(chat_id, 'Donde quieres ir?', reply_markup=build_buttons(cineList, 'cine', 2))
 
 
-        elif '/sugerirPelicula' in mensaje:
+        elif mensaje == '/sugerirPelicula':
 
             bot.sendMessage(chat_id, '/sugerirPelicula: Todavia da hacer!')
 
 
-        elif '/help' or 'Help' in mensaje:
-
-
-            #reply_markup = ReplyKeyboardRemove()
-            #bot.sendMessage(chat_id=chat_id, text=None, reply_markup=reply_markup)
+        elif mensaje == '/help':
 
             bot.sendMessage(chat_id, 'Comandos:'
-                                     '\n /buscarCine - Usa este comando para ver la cartelera del cine elegido.'
+                                     '\n /buscarCine - Usa este comando para ver la cartelera del cine que quieras.'
                                      '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
                                      '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.'
                                      '\n /sugerirPelicula - Envia la informacion sobre una pelicula estrenada recientemente al azar.')
@@ -160,9 +141,7 @@ class UserHandler(telepot.helper.ChatHandler):
         else:
 
             bot.sendMessage(chat_id, 'Que quieres hacer?')
-
-            photo = urllib2.urlopen('https://thumbs.dreamstime.com/z/gente-bianca-3d-con-un-punto-interrogativo-27709668.jpg')
-            bot.sendPhoto(chat_id, ('cine.jpg', photo))
+            bot.sendPhoto(chat_id, 'http://blog.pianetadonna.it/l67/wp-content/uploads/2014/10/punto_di_domanda.jpg')
 
 
 
@@ -180,17 +159,16 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
 
 
         if query_data == 'start/No':
+            bot.sendMessage(from_id, '¡Qué pena! Espero verte pronto otra vez 🙂🙂🙂')
             bot.sendPhoto(from_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
 
 
-        elif query_data == 'start/Yes':
+        elif query_data == 'start/Si':
 
-            bot.sendMessage(from_id, 'Que quieres hacer?')
 
-            photo = urllib2.urlopen('http://www.smeraldocinema.it/public/file/Cinemacard4.jpg')
-            bot.sendPhoto(from_id, ('cine.jpg', photo))
+            bot.sendPhoto(from_id, 'http://www.smeraldocinema.it/public/file/Cinemacard4.jpg')
 
-            bot.sendMessage(from_id, '\nComandos:'
+            bot.sendMessage(from_id, '\nSi quieres puedes utilizar uno de estos comandos:'
                                      '\n /buscarCine - Usa este comando para ver la cartelera del cine elegido.'
                                      '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
                                      '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.'
@@ -199,17 +177,18 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
         elif 'cine' in query_data:
 
             cine = query_data.split('/')
-            print cine
+            #print cine
 
             #aqui va la funcion que busca en la base de datos el cine y return la cartelera del cine = lista de peliculas
             found = True
 
-            peliList = ['peli1', 'peli2', 'peli3', 'peli4']
+            peli1List = ['Cincuenta sombras liberadas', 'La forma del agua', 'Gorrión Rojo', 'Campeones']
+
 
             if found:
 
                 #envia cartelera
-                bot.sendMessage(from_id, 'Que quieres ver?', reply_markup=build_buttons(peliList, 'pelicula', 2))
+                bot.sendMessage(from_id, 'En este cine están disponibles estas peliculas', reply_markup=build_buttons(peli1List, 'pelicula', 2))
 
             else:
                 bot.sendMessage(from_id, 'No he encontrado algun cine ' + cine[1])
@@ -219,32 +198,51 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
         elif 'pelicula' in query_data:
 
             peli = query_data.split('/')
-            print peli
+            #print (peli)
 
             #buscar pelicula
 
+            bot.sendPhoto(from_id, 'https://i.blogs.es/76dd90/gorrion-rojo/450_1000.jpg')
 
-            infoPeli = ['Sinopsis', 'Fotos', 'Reparto', 'Director', 'Valoraciones', 'Ultimas noticias', 'Trailer']
+            infoPeli = ['Director', 'Reparto', 'Valoraciones', 'Sinopsis']
 
-            bot.sendMessage(from_id, 'Que queires ver?', reply_markup=build_buttons(infoPeli, 'infoPeli/'+ peli[1] + '/', 2))
+            bot.sendMessage(from_id, peli[1], reply_markup=build_buttons(infoPeli, 'infoPeli/'+ peli[1] + '/', 2))
 
 
         elif 'infoPeli' in query_data:
 
             info = query_data.split('/')
             peli = info[1]
-            infoRequest = info[2]
+            infoRequest = info[3]
 
             #busca en la base de datos el atributo request de la peli
 
-            bot.sendMessage(from_id, info)
+            if infoRequest == 'Director':
+                bot.sendMessage(from_id, 'Francis Lawrence')
 
+            elif infoRequest == 'Reparto':
+                bot.sendMessage(from_id, 'Jennifer Lawrence\n'
+                                         'Joel Edgerton\n'
+                                         'Matthias Schoenaerts\n'
+                                         'Egorov\n'
+                                         'Jeremy Irons\n'
+                                         'Joely Richardson\n')
 
+            elif infoRequest == 'Sinopsis':
+                bot.sendMessage(from_id, 'Francis Lawrence dirige esta película de suspense y espionaje basado en una '
+                                         'novela homónima escrita por Jason Matthews. Protagonizada por Jennifer Lawrence, '
+                                         'la historia se centra en Dominika Egorova, una joven rusa que pertenece al servicio '
+                                         'secreto de Rusia y ha sido entrenada por la Escuela Gorrión. Dicha escuela está especializada '
+                                         'en entrenar el cuerpo y la mente de las personas para que las utilicen como armas. Las iniciadas '
+                                         'aprenderán el arte de la seducción como método para conseguir sacar información de sus enemigos, '
+                                         'de una forma que no tengan que utilizar la violencia. Dominika sabe utilizar sus encantos y por ello, '
+                                         'se convierte en el miembro más peligroso de la Escuela Gorrión. Dominika tendrá su primer objetivo, '
+                                         'Nate Nash, un agente primerizo de la CIA, que vive en Rusia y es el encargado de los activos de la agencia.'
+                                         ' Los problemas llegarán para ella cuando descubra que hay un topo en su propia organización. Prepárate para '
+                                         'una misión donde el engaño, el misterio y el sexo serán los principales ingredientes.')
 
-
-
-
-
+            elif infoRequest == 'Valoraciones':
+                bot.sendMessage(from_id, '6.8: ⭐⭐⭐⭐⭐⭐⭐')
 
 
 
