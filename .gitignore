@@ -1,2 +1,5 @@
 
 .DS_Store
+Codigo/Movies/__pycache__/movies.cpython-36.pyc
+*.xml
+*.iml

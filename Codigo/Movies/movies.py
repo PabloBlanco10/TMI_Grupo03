@@ -16,6 +16,8 @@
 import sys
 import time
 import imdb
+from googletrans import Translator
+
 
 
 class Movie:
@@ -45,11 +47,15 @@ class Movie:
     def getmovie(self):
         self.searchmovie()
         self.getinfofrommovie()
+        translator = Translator()
 
         duracion = self.the_unt['runtime']
         valoracion = self.the_unt['rating']
         director = self.the_unt['director'] # get a list of Person objects.
         sinopsis = self.the_unt['plot outline']
+        translation = translator.translate(sinopsis, dest='es')
+        sinopsis = translation.text
+
         generos = self.the_unt['genres']
         urlcartel = self.the_unt['cover url']
         actores = self.the_unt['cast']
@@ -63,4 +69,4 @@ class Movie:
         print("Director: " + director[0]['name'])
         print("Géneros: " + str(generos))
         print("Actores: " + stringActores)
-        print("Sinopsis: " + sinopsis)
+        print("Sinopsis: " + str(sinopsis))
