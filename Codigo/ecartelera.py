@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+
+########################################################
+#################### TELEGRAM BOT ######################
+################ CINEBOT - @CICINEBOT ##################
+## UCM - MASTER INGENIERIA INFORMATICA - TMI - GRUPO 3 #
+########################################################
+
+##################### AUTORES ##########################
+############## Andres Aguirre Juarez ###################
+############### Pablo Blanco Peris #####################
+############# Maria Castaneda Lopez ####################
+############### Maurizio Vittorini #####################
+########################################################
+
 import scrapy
 import re
 from scrapy.selector import Selector
@@ -8,6 +22,8 @@ from bs4 import BeautifulSoup
 import urllib.request
 import requests
 import MySQLdb
+
+##CONEXION CON LA BD
 
 def conecction():
     conn = MySQLdb.connect(host= "localhost",
@@ -24,10 +40,10 @@ def cargarCinesEnBBDD(nombreCine, enlaceCine):
 
     for cine in nombreCine:
 
-        query = "INSERT IGNORE INTO Cine (nombre, enlace) VALUES ('{0}', '{1}');" .format(cine, enlaceCine[i])
+        query = "INSERT IGNORE INTO Cine (nombre, enlace, id ) VALUES ('{0}', '{1}', '{2}');" .format(cine, enlaceCine[i], i)
         
         try:
-            print(query)
+            #print(query)
             x.execute(query)
         except MySQLdb.ProgrammingError:
             print("La siguiente query ha fallado:%s" % query + '\n')
@@ -43,14 +59,14 @@ def cargarPasesEnBBDD(enlaceCine, pelicula, hora):
     conn = conecction()
     x = conn.cursor()
     
-    query = "INSERT IGNORE INTO Pases (nombreCine, nombrePelicula, hora) VALUES ('{0}', '{1}', '{2}');" .format(enlaceCine, pelicula, hora)
+    query = "INSERT IGNORE INTO Pases (nombreCine, idPelicula, hora) VALUES ('{0}', '{1}', '{2}');" .format(enlaceCine, pelicula, hora)
         
     try:
-        print(query)
+        #print(query)
         x.execute(query)
     except MySQLdb.ProgrammingError:
         print("La siguiente query ha fallado:%s" % query + '\n')
-    print("El cine " + str(enlaceCine) + " ha añadido la peli " + pelicula + " a la hora: " + hora)
+    print("El cine " + str(enlaceCine) + " ha añadido la peli " + str(pelicula) + " a la hora: " + hora)
 
     conn.commit()
     x.close()
@@ -73,19 +89,26 @@ def leerCinesFichero(nombreFichero):
 def buscarPeliEnBD(peli):
     conn = conecction()
     x = conn.cursor()
-    escaped = re.escape(peli)
+    #escaped = re.escape(peli)
+    peli = peli.replace("'", "")
 
-    query = "SELECT nombre FROM Pelicula WHERE nombre = '{0}';".format(escaped)
-    
+    query = "SELECT nombre FROM Pelicula WHERE nombre = '{0}';".format(peli)
+    print (query)
     try:
         x.execute(query)
         
     except MySQLdb.ProgrammingError:
         print("La siguiente query ha fallado: " + query + '\n')
     
-    peli = peli.format(peli)
+
+    if x.rowcount == 0:
+        conn.commit()
+        x.close()
+        conn.close()
+        return False
+
     for line in x:
-        #print (line)
+        print (peli + " " + line[0])
         if peli == line[0]:
             conn.commit()
             x.close()
@@ -96,13 +119,16 @@ def buscarPeliEnBD(peli):
         conn.close()
         return False
 
+
 def cargarPeliculasEnBBDD(pelicula):
     conn = conecction()
     x = conn.cursor()
     
     for p in pelicula:
+        p = p.replace("'", "")
+        print (p)
         if (buscarPeliEnBD(p)==False):
-            p = str(MySQLdb.escape_string(p))
+            #p = str(MySQLdb.escape_string(p))
             query = "INSERT IGNORE INTO Pelicula (nombre) VALUES ('{0}');" .format(p)
             
             try:
@@ -111,11 +137,229 @@ def cargarPeliculasEnBBDD(pelicula):
             except MySQLdb.ProgrammingError:
                 print("La siguiente query ha fallado:%s" % query + '\n')
             print("La pelicula " + str(p) + " ha sido añadida.")
+
+    #print (pelicula)
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+def getClaveCine(nombreCine):
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    
+    query = "SELECT enlace FROM Cine WHERE nombre = '{0}';" .format(nombreCine);
+    
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+    
+    k = 0
+    for i in x:
+        resultados.append( i[0])
     
     conn.commit()
     x.close()
     conn.close()
 
+    return resultados[0]
+
+def getClaveCineID(id):
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    
+    query = "SELECT enlace FROM Cine WHERE id = '{0}';" .format(id);
+    
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+    
+    k = 0
+    for i in x:
+        resultados.append( i[0])
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados[0]
+
+def getCines():
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    
+    query = "SELECT nombre FROM Cine ORDER BY nombre;"
+    
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+    
+    k = 0
+    
+    for i in x:
+        resultados.append( i[0])
+        k = k+1
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados
+
+# Devuelve el id del cine
+def getIdCine(nombre):
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    
+    query = "SELECT id FROM Cine WHERE nombre = '{0}';" .format(nombre);
+    
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+    
+    k = 0
+    for i in x:
+        resultados.append( i[0])
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados[0]
+
+# Devuelve las películas que hay en un cine concreto.
+def getPeliculasEnCine(nombreCine):
+    conn = conecction()
+    x = conn.cursor()
+    resultados = getClaveCine(nombreCine)
+    
+    #query = "SELECT nombrePelicula, hora FROM Pases WHERE nombreCine = '{0}' ORDER BY hora;" .format(resultados[0]);
+    query = "SELECT DISTINCT Pelicula.nombre FROM Pelicula, Pases WHERE Pases.idPelicula = Pelicula.id AND Pases.nombreCine = '{0}';" .format(resultados);
+    print(query)
+    try:
+        x.execute(query)
+
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    resultados = []
+    for i in x:
+        #resultados.append(str(i[0] + ' ' + i[1]))
+        resultados.append(i[0])
+        #print ( i[0] + ' ' + i[1] )
+        #print ( i[0] )
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados
+
+#Devuelve los pases de una película en el último cine seleccionado
+def getPasesDePelicula(pelicula, cine):
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    
+    query = "SELECT hora FROM Pases WHERE nombreCine = '{0}' and idPelicula = '{1}';" .format(cine, pelicula);
+    print(query)
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    k = 0
+    for i in x:
+        resultados.append(i[0])
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados
+
+def getNombreCineById(id):
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    
+    query = "SELECT nombre FROM Cine WHERE id = '{0}';" .format(id);
+    print(query)
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+    
+    k = 0
+    for i in x:
+        resultados.append(i[0])
+    
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados[0]
+
+def getNombrePeliculaById(id):
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    
+    query = "SELECT nombre FROM Pelicula WHERE id = '{0}';" .format(id);
+    print(query)
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+    
+    k = 0
+    for i in x:
+        resultados.append(i[0])
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados[0]
+
+def getIdPelicula(pelicula):
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    pelicula = pelicula.replace("'","")
+    
+    query = "SELECT id FROM Pelicula WHERE nombre = '{0}';" .format(pelicula);
+    print(query)
+    try:
+        x.execute(query)
+    
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+    
+    k = 0
+    for i in x:
+        resultados.append(i[0])
+
+    conn.commit()
+    x.close()
+    conn.close()
+    print (resultados)
+    return resultados[0]
 
 def buscarPeliculaEnCine(url):
     pelicula = list()
@@ -143,21 +387,22 @@ def buscarPeliculaEnCine(url):
         cont = cont + 1
     for i in peliculaPase:
         for time in peliculaPase[i]:
-            print (str(i) + time)
-            cargarPasesEnBBDD(url, i, time)
+            #print (str(i) + time)
+            cargarPasesEnBBDD(url, getIdPelicula(i), time)
     return peliculaPase
 
-
+#getCines()
 
 #En fichero.txt están los enlaces a cada cine y el nombre de cada cines en una misma linea, separado por _
-(nombreCine, enlaceCine) = leerCinesFichero("cinesMadrid.txt")
+#(nombreCine, enlaceCine) = leerCinesFichero("cinesMadrid.txt")
 
 #Es necesario cargar los cines una vez en la BBDD
 #cargarCinesEnBBDD(nombreCine, enlaceCine)
 
 #url = 'https://www.ecartelera.com/cines/dreams-cinema-palacio-hielo/'
-for url in enlaceCine:
-    buscarPeliculaEnCine(url)
+#for url in enlaceCine:
+#    buscarPeliculaEnCine(url)
+
 
 
 
