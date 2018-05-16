@@ -64,6 +64,8 @@ def build_buttons(list, callback_key, n_cols, header_buttons=None, footer_button
             #print(i)
             data.append(ecartelera.getIdCine(i))
     #print(data)
+    else:
+        data = list
     k = 0
     for n in list:
         button = InlineKeyboardButton(text=n, callback_data=callback_key + '/' + str(data[k]))

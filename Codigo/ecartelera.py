@@ -93,7 +93,7 @@ def buscarPeliEnBD(peli):
     peli = peli.replace("'", "")
 
     query = "SELECT nombre FROM Pelicula WHERE nombre = '{0}';".format(peli)
-    print (query)
+    #print (query)
     try:
         x.execute(query)
         
@@ -108,7 +108,7 @@ def buscarPeliEnBD(peli):
         return False
 
     for line in x:
-        print (peli + " " + line[0])
+        #print (peli + " " + line[0])
         if peli == line[0]:
             conn.commit()
             x.close()
@@ -268,12 +268,12 @@ def getPeliculasEnCine(nombreCine):
     return resultados
 
 #Devuelve los pases de una película en el último cine seleccionado
-def getPasesDePelicula(pelicula, cine):
+def getPasesDePelicula(idPelicula, enlace):
     conn = conecction()
     x = conn.cursor()
     resultados =[]
     
-    query = "SELECT hora FROM Pases WHERE nombreCine = '{0}' and idPelicula = '{1}';" .format(cine, pelicula);
+    query = "SELECT hora FROM Pases WHERE nombreCine = '{0}' and idPelicula = '{1}';" .format(enlace, idPelicula);
     print(query)
     try:
         x.execute(query)
@@ -391,11 +391,43 @@ def buscarPeliculaEnCine(url):
             cargarPasesEnBBDD(url, getIdPelicula(i), time)
     return peliculaPase
 
+def borrarDatos():
+    conn = conecction()
+    x = conn.cursor()
+    resultados =[]
+    print("Borrando la base de datos")
+    query = "DELETE FROM Pases;"
+
+    try:
+        x.execute(query)
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    conn.commit()
+    query1 = "DELETE FROM Pelicula;"
+
+    try:
+        x.execute(query1)
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    conn.commit()
+    query2 = "DELETE FROM Cine;"
+
+    try:
+        x.execute(query2)
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    conn.commit()
+    x.close()
+    conn.close()
+
 #getCines()
 
 #En fichero.txt están los enlaces a cada cine y el nombre de cada cines en una misma linea, separado por _
 #(nombreCine, enlaceCine) = leerCinesFichero("cinesMadrid.txt")
-
+#borrarDatos()
 #Es necesario cargar los cines una vez en la BBDD
 #cargarCinesEnBBDD(nombreCine, enlaceCine)
 
