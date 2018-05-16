@@ -26,6 +26,9 @@ from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
 
 TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM' # @cicinebotmaurizio
+#TOKEN = '581607975:AAG995XceTIs5DjdW70blkjF3__IGCKv2_w'  # @CicinebotPablo_bot
+#TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
+#TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM'  # @CicinebotMaurizio_bot
 
 
 def on_notify_message(msg):
@@ -49,21 +52,23 @@ def build_buttons(list, callback_key, n_cols, header_buttons=None, footer_button
 
     buttones = []
     data = []
-    if 'pelicula' in callback_key:
-        #for i in list:
-            #print(i)
-            #data.append(ecartelera.getIdPelicula(i))
+    if 'infoPeli' in callback_key:
         data = list
+    elif 'pelicula' in callback_key:
+        for i in list:
+            #print(i)
+            data.append(ecartelera.getIdPelicula(i))
+        #data = list
     elif 'cine' in callback_key:
         for i in list:
-            print(i)
+            #print(i)
             data.append(ecartelera.getIdCine(i))
-    else:
-        data = list
-    print(data)
+    #print(data)
     k = 0
     for n in list:
-        buttones.append(InlineKeyboardButton(text=n, callback_data=callback_key + '/' + str(data[k])))
+        button = InlineKeyboardButton(text=n, callback_data=callback_key + '/' + str(data[k]))
+        buttones.append(button)
+        print(button)
         k = k + 1
     return InlineKeyboardMarkup(inline_keyboard=build_menu(buttones, n_cols, header_buttons, footer_buttons))
 
@@ -75,10 +80,10 @@ class UserHandler(telepot.helper.ChatHandler):
 
     def on_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
-        print (content_type, chat_type, chat_id)
+        #print (content_type, chat_type, chat_id)
 
         mensaje = msg['text']
-        print(mensaje)
+        print("El usuario " + str(chat_id) + " escribió " + mensaje)
 
         if mensaje == '/start':
 
@@ -153,7 +158,7 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
         # print('Callback Query catch')
         # print('Callback Query:', query_id, from_id, query_data)
-        print ( str(from_id) + " seleccionó " + query_data )
+        print ( "El usuario " + str(from_id) + " seleccionó " + query_data )
 
         if query_data == 'start/No':
             bot.sendMessage(from_id, '¡Qué pena! Espero verte pronto otra vez 🙂🙂🙂')
@@ -174,7 +179,7 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
         elif 'infoPeli' in query_data:
     
             info = query_data.split('/')
-            print (info)
+            print ("Estas en elif infoPeli :" + str(info))
             peli = info[1]
             
             infoRequest = info[6]
@@ -193,69 +198,71 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
                                 'Joely Richardson\n')
         
             elif infoRequest == 'Sinopsis':
-                bot.sendMessage(from_id, 'Francis Lawrence dirige esta película de suspense y espionaje basado en una '
-                                'novela homónima escrita por Jason Matthews. Protagonizada por Jennifer Lawrence, '
-                                'la historia se centra en Dominika Egorova, una joven rusa que pertenece al servicio '
-                                'secreto de Rusia y ha sido entrenada por la Escuela Gorrión. Dicha escuela está especializada '
-                                'en entrenar el cuerpo y la mente de las personas para que las utilicen como armas. Las iniciadas '
-                                'aprenderán el arte de la seducción como método para conseguir sacar información de sus enemigos, '
-                                'de una forma que no tengan que utilizar la violencia. Dominika sabe utilizar sus encantos y por ello, '
-                                'se convierte en el miembro más peligroso de la Escuela Gorrión. Dominika tendrá su primer objetivo, '
-                                'Nate Nash, un agente primerizo de la CIA, que vive en Rusia y es el encargado de los activos de la agencia.'
-                                ' Los problemas llegarán para ella cuando descubra que hay un topo en su propia organización. Prepárate para '
-                                'una misión donde el engaño, el misterio y el sexo serán los principales ingredientes.')
+                bot.sendMessage(from_id, 'La sinopsis de la pelicula es: ')
             
+            elif infoRequest == 'Duracion':
+                bot.sendMessage(from_id, 'La duracion de la pelicula es:')
             elif infoRequest == 'Valoraciones':
                 bot.sendMessage(from_id, '6.8: ⭐⭐⭐⭐⭐⭐⭐')
+            elif infoRequest == 'Generos':
+                bot.sendMessage(from_id, 'Los generos de la pelicula son: ')
 
 
 
         elif 'pelicula' in query_data:
 
-            peli = query_data.split('/')
-            print("La pelicula es : " + str(peli))
-            peliculaElegida = peli[3]
-            cineElegido = ecartelera.getNombreCineById(peli[1])
-            print ("EL ID DEL CINE ES: " + cineElegido)
-            pasesPelicula = ecartelera.getPasesDePelicula(peli[3],peli[1])
+            mensaje = query_data.split('/')
+            print("La pelicula es : " + str(mensaje))
+            idPelicula = mensaje[3]
+            nombreCine = ecartelera.getNombreCineById(mensaje[1])
+            nombrePelicula = ecartelera.getNombrePeliculaById(idPelicula)
+            print (mensaje)
+            idCine = ecartelera.getClaveCine(nombreCine)
+            print ("El cine en el que se proyecta la película es: " + nombreCine + " y tiene el ID = " + idCine)
+            pasesPelicula = ecartelera.getPasesDePelicula(idPelicula,idCine)
             #buscar pelicula
 
-            bot.sendPhoto(from_id, 'https://i.blogs.es/76dd90/gorrion-rojo/450_1000.jpg')
+            #bot.sendPhoto(from_id, 'https://i.blogs.es/76dd90/gorrion-rojo/450_1000.jpg')
 
-            infoPeli = ['Director', 'Reparto', 'Valoraciones', 'Sinopsis']
+            bot.sendMessage(from_id, "Inserte aquí su método en el que envia sobre los pases de la película+")
+
+
+            infoPeli = ['Director', 'Reparto', 'Valoraciones', 'Sinopsis', 'Duracion', 'Generos']
 
             pases = ""
             for i in pasesPelicula:
                 pases = pases + str(i) + " "
             
-            data = peli[1] + '/' + peli[2] + '/' + peli[3] + '/' + str(ecartelera.getIdPelicula(peliculaElegida))
+            data = mensaje[0] + '/' + mensaje[1] + '/' + mensaje[2] + '/' + idPelicula
             
-            mensaje = "La pelicula " + peliculaElegida + " en el cine " + cineElegido # + ", tiene los siguientes pases: " + pases
+            mensaje = "La pelicula " + nombrePelicula + " en el cine " + nombreCine  + ", tiene los siguientes pases: " + pases
 
-            bot.sendMessage(from_id, mensaje , reply_markup=build_buttons(infoPeli, data + '/' + 'infoPeli/', 2))
+            print (data)
+
+            bot.sendMessage(from_id, mensaje , reply_markup=build_buttons(infoPeli, data + '/infoPeli/', 2))
 
 
         elif 'cine' in query_data:
     
-            cine = query_data.split('/')
-            idCine = cine[1]
-            ultimoCine = ecartelera.getNombreCineById(idCine)
+            mensaje = query_data.split('/')
+            idCine = mensaje[1]
+            nombreCine = ecartelera.getNombreCineById(idCine)
             #print (cine)
-            peli1List = ['Cincuenta sombras liberadas', 'La forma del agua', 'Gorrión Rojo', 'Campeones']
-            peli1List = ecartelera.getPeliculasEnCine(ultimoCine)
+            #peli1List = ['Cincuenta sombras liberadas', 'La forma del agua', 'Gorrión Rojo', 'Campeones']
+            peli1List = ecartelera.getPeliculasEnCine(nombreCine)
+            print ( peli1List)
+            #idCine = ecartelera.getIdCine(nombreCine)
+            
 
-            idCine = ecartelera.getIdCine(ultimoCine)
-            found = True
-
-            if found:
+            if len(peli1List) > 0:
                 
                 #envia cartelera
                 string = "cine/" + str(idCine) + "/pelicula"
-                print (string)
-                bot.sendMessage(from_id, "En el cine " + ultimoCine + " están disponibles estas peliculas", reply_markup=build_buttons(peli1List, string, 1))
+                #print (string)
+                bot.sendMessage(from_id, "En el cine " + nombreCine + " están disponibles estas peliculas", reply_markup=build_buttons(peli1List, string, 1))
             
             else:
-                bot.sendMessage(from_id, 'No he encontrado ningún cine ' + cine[1])
+                bot.sendMessage(from_id, 'No he encontrado ningún cine ' + mensaje[1])
                 bot.sendPhoto(from_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
     
 
