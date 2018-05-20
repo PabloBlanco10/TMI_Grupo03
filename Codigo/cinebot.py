@@ -15,7 +15,7 @@ import sys
 import time
 import urllib3
 import ecartelera
-
+import Movies.movies
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -64,6 +64,8 @@ def build_buttons(list, callback_key, n_cols, header_buttons=None, footer_button
             #print(i)
             data.append(ecartelera.getIdCine(i))
     #print(data)
+    else:
+        data=list
     k = 0
     for n in list:
         button = InlineKeyboardButton(text=n, callback_data=callback_key + '/' + str(data[k]))
@@ -88,16 +90,12 @@ class UserHandler(telepot.helper.ChatHandler):
         if mensaje == '/start':
 
             optionList = ['Si', 'No']
-
             bot.sendMessage(chat_id, 'Buenas, soy CineBot, ¿te apetece ir al cine? 📽🎞🍿🥤🎬', reply_markup=build_buttons(optionList, 'start' , 2))
-            #bot.sendAudio(chat_id=chat_id, audio=open('start.mp3', 'rb'))
 
         elif mensaje == '/buscarCine':
 
             #aqui va la funcion que busca en la base de datos los cines
             cine = ecartelera.getCines()
-
-            #cineList = ['Yelmo Cines Plenilunio', 'Yelmo Cines Islazul', 'Cinesa Príncipe Pío 3D', 'La Vaguada']
 
             #envia lista de cines
             bot.sendMessage(chat_id, '¿A qué cine te apetece ir?', reply_markup=build_buttons(cine, 'cine', 1))
@@ -117,7 +115,7 @@ class UserHandler(telepot.helper.ChatHandler):
                 bot.sendMessage(chat_id, 'Donde quieres ir?', reply_markup=build_buttons(cineList, 'cine', 2))
 
             else:
-                bot.sendMessage(chat_id, 'No he encontrado algun peli ' + peli[0])
+                bot.sendMessage(chat_id, 'No he encontrado ninguna peli ' + peli[0])
                 bot.sendPhoto(chat_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
 
 
@@ -156,8 +154,6 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
     
     def on_callback_query(self, msg):
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
-        # print('Callback Query catch')
-        # print('Callback Query:', query_id, from_id, query_data)
         print ( "El usuario " + str(from_id) + " seleccionó " + query_data )
 
         if query_data == 'start/No':
@@ -180,32 +176,35 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
     
             info = query_data.split('/')
             print ("Estas en elif infoPeli :" + str(info))
-            peli = info[1]
-            
+
             infoRequest = info[6]
+            AQUI NECESITO EL NOMBRE DE LA PELICULA
+
+            movie = Movies.movies.Movie(nombrePelicula)
             
             #busca en la base de datos el atributo request de la peli
             
             if infoRequest == 'Director':
-                bot.sendMessage(from_id, 'Francis Lawrence')
+                bot.sendMessage(from_id, 'El director de la película es: ' + movie.director)
             
             elif infoRequest == 'Reparto':
-                bot.sendMessage(from_id, 'Jennifer Lawrence\n'
-                                'Joel Edgerton\n'
-                                'Matthias Schoenaerts\n'
-                                'Egorov\n'
-                                'Jeremy Irons\n'
-                                'Joely Richardson\n')
+                bot.sendMessage(from_id, 'Reparto: ' + movie.actors)
         
             elif infoRequest == 'Sinopsis':
-                bot.sendMessage(from_id, 'La sinopsis de la pelicula es: ')
+                bot.sendMessage(from_id, 'Sinopsis: ' + movie.synopsis)
             
             elif infoRequest == 'Duracion':
-                bot.sendMessage(from_id, 'La duracion de la pelicula es:')
+                bot.sendMessage(from_id, 'La película dura ' + movie.duration + 'min')
+
             elif infoRequest == 'Valoraciones':
-                bot.sendMessage(from_id, '6.8: ⭐⭐⭐⭐⭐⭐⭐')
+                stringValoration = ''
+                val = int(movie.valoration[0:1])
+                for i in range(0,val):
+                    stringValoration += '⭐'
+                bot.sendMessage(from_id, stringValoration)
+
             elif infoRequest == 'Generos':
-                bot.sendMessage(from_id, 'Los generos de la pelicula son: ')
+                bot.sendMessage(from_id, movie.gender)
 
 
 
@@ -214,18 +213,17 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
             mensaje = query_data.split('/')
             print("La pelicula es : " + str(mensaje))
             idPelicula = mensaje[3]
+
             nombreCine = ecartelera.getNombreCineById(mensaje[1])
             nombrePelicula = ecartelera.getNombrePeliculaById(idPelicula)
+            movie = Movies.movies.Movie(nombrePelicula)
+            bot.sendPhoto(from_id, movie.urlcartel)
+
             print (mensaje)
             idCine = ecartelera.getClaveCine(nombreCine)
             print ("El cine en el que se proyecta la película es: " + nombreCine + " y tiene el ID = " + idCine)
             pasesPelicula = ecartelera.getPasesDePelicula(idPelicula,idCine)
             #buscar pelicula
-
-            #bot.sendPhoto(from_id, 'https://i.blogs.es/76dd90/gorrion-rojo/450_1000.jpg')
-
-            bot.sendMessage(from_id, "Inserte aquí su método en el que envia sobre los pases de la película+")
-
 
             infoPeli = ['Director', 'Reparto', 'Valoraciones', 'Sinopsis', 'Duracion', 'Generos']
 
@@ -234,11 +232,8 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
                 pases = pases + str(i) + " "
             
             data = mensaje[0] + '/' + mensaje[1] + '/' + mensaje[2] + '/' + idPelicula
-            
             mensaje = "La pelicula " + nombrePelicula + " en el cine " + nombreCine  + ", tiene los siguientes pases: " + pases
-
-            print (data)
-
+            print(data)
             bot.sendMessage(from_id, mensaje , reply_markup=build_buttons(infoPeli, data + '/infoPeli/', 2))
 
 
@@ -247,12 +242,8 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
             mensaje = query_data.split('/')
             idCine = mensaje[1]
             nombreCine = ecartelera.getNombreCineById(idCine)
-            #print (cine)
-            #peli1List = ['Cincuenta sombras liberadas', 'La forma del agua', 'Gorrión Rojo', 'Campeones']
             peli1List = ecartelera.getPeliculasEnCine(nombreCine)
             print ( peli1List)
-            #idCine = ecartelera.getIdCine(nombreCine)
-            
 
             if len(peli1List) > 0:
                 
@@ -264,36 +255,6 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
             else:
                 bot.sendMessage(from_id, 'No he encontrado ningún cine ' + mensaje[1])
                 bot.sendPhoto(from_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
-    
-
-
-#def on_inline_query(msg):
-#
-#    def compute():
-#        query_id, from_id, query_string = telepot.glance(msg, flavor='inline_query')
-#        print('Inline Query:', query_id, from_id, query_string)
-#
-#        mensaje = msg['text']
-#        mensaje = query_string['text']
-#
-#
-#        articles = [InlineQueryResultArticle(
-#                        id='abc',
-#                        title=query_string,
-#                        input_message_content=InputTextMessageContent(
-#                            message_text=query_string
-#                        )
-#                   )]
-#
-#        return articles
-#
-#    answerer.answer(msg, compute)
-#
-#
-#
-#def on_chosen_inline_result(msg):
-#    result_id, from_id, query_string = telepot.glance(msg, flavor='chosen_inline_result')
-#    print ('Chosen Inline Result:', result_id, from_id, query_string)
 
 
 bot = telepot.DelegatorBot(TOKEN, [
@@ -306,7 +267,5 @@ bot = telepot.DelegatorBot(TOKEN, [
     ,
 ])
 
-#answerer = telepot.helper.Answerer(bot)
 
 bot.message_loop(run_forever='Listening ...')
-
