@@ -229,7 +229,8 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
                 bot.sendMessage(from_id, 'El director de la película es: ' + movie.director)
             
             elif infoRequest == 'Reparto':
-                bot.sendMessage(from_id, 'Reparto: ' + movie.actors)
+                actores = ', '.join(movie.actors)
+                bot.sendMessage(from_id, 'Reparto: ' + actores)
         
             elif infoRequest == 'Sinopsis':
                 bot.sendMessage(from_id, 'Sinopsis: ' + movie.synopsis)
@@ -245,7 +246,8 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
                 bot.sendMessage(from_id, stringValoration)
 
             elif infoRequest == 'Generos':
-                bot.sendMessage(from_id, movie.gender)
+                generos = ', '.join(movie.gender)
+                bot.sendMessage(from_id, 'Generos: ' + generos)
 
 
 

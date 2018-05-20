@@ -25,8 +25,8 @@ class Movie:
     movieName = None
     valoration = None
     director = None
-    gender = None
-    actors = None
+    gender = []
+    actors = []
     synopsis = None
     urlcartel = None
 
@@ -77,9 +77,13 @@ class Movie:
         actores = self.the_unt.get('cast')
         actores = actores[0:10]
 
-        stringActores = ''
+        stringActores = []
         for actor in actores:
-            stringActores += actor['name']+', '
+            stringActores.append(actor['name'])
+
+        stringGeneros = []
+        for genero in generos:
+            stringGeneros.append(genero)
 
 
         print("Película: " + self.movieName)
@@ -93,10 +97,10 @@ class Movie:
         print("Director: " + director[0]['name'])
         self.director = director[0]['name']
 
-        print("Géneros: " + str(generos))
-        self.gender = str(generos)
+       # print("Géneros: " + str(generos))
+        self.gender = stringGeneros
 
-        print("Actores: " + stringActores)
+        #print("Actores: " + stringActores)
         self.actors = stringActores
 
         print("Sinopsis: " + str(sinopsis))
