@@ -314,6 +314,34 @@ def getNombreCineById(id):
 
     return resultados[0]
 
+
+def getCoordenadasCine():
+    conn = conecction()
+    x = conn.cursor()
+
+    # query = "SELECT nombrePelicula, hora FROM Pases WHERE nombreCine = '{0}' ORDER BY hora;" .format(resultados[0]);
+    query = "SELECT coordenadaX, coordenadaY, id FROM Cine;"
+
+    print(query)
+    try:
+        x.execute(query)
+
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    resultados = []
+    for i in x:
+        # resultados.append(str(i[0] + ' ' + i[1]))
+        resultados.append(i)
+    # print ( i[0] + ' ' + i[1] )
+    # print ( i[0] )
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados
+
 def getNombrePeliculaById(id):
     conn = conecction()
     x = conn.cursor()
@@ -426,7 +454,7 @@ def borrarDatos():
 #getCines()
 
 #En fichero.txt están los enlaces a cada cine y el nombre de cada cines en una misma linea, separado por _
-#(nombreCine, enlaceCine) = leerCinesFichero("cinesMadrid.txt")
+#(nombreCine, enlaceCine) = leerCinesFichero("cinesLlenos.txt")
 #borrarDatos()
 #Es necesario cargar los cines una vez en la BBDD
 #cargarCinesEnBBDD(nombreCine, enlaceCine)

@@ -15,6 +15,7 @@ import sys
 import time
 import urllib3
 import ecartelera
+import math
 import Movies.movies
 import telepot
 from telepot.loop import MessageLoop
@@ -24,10 +25,10 @@ from telepot.delegate import pave_event_space, per_chat_id, create_open, per_cal
 from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
 
 
-TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
+#TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM' # @cicinebotmaurizio
 #TOKEN = '581607975:AAG995XceTIs5DjdW70blkjF3__IGCKv2_w'  # @CicinebotPablo_bot
-#TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
+TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM'  # @CicinebotMaurizio_bot
 
 
@@ -74,7 +75,6 @@ def build_buttons(list, callback_key, n_cols, header_buttons=None, footer_button
         k = k + 1
     return InlineKeyboardMarkup(inline_keyboard=build_menu(buttones, n_cols, header_buttons, footer_buttons))
 
-
 #clase que gestiona los mensajes recibidos por el chat
 class UserHandler(telepot.helper.ChatHandler):
     def __init__(self, *args, **kwargs):
@@ -84,68 +84,107 @@ class UserHandler(telepot.helper.ChatHandler):
         content_type, chat_type, chat_id = telepot.glance(msg)
         #print (content_type, chat_type, chat_id)
 
-        mensaje = msg['text']
-        print("El usuario " + str(chat_id) + " escribió " + mensaje)
+        if 'location' in msg.keys():
+            localizacion = msg['location']
+            print(localizacion)
+            self.handle_location(localizacion, msg, chat_id)
 
-        if mensaje == '/start':
+        elif 'text' in msg.keys():
+            mensaje = msg['text']
+            print("El usuario " + str(chat_id) + " escribió " + mensaje)
 
-            optionList = ['Si', 'No']
-            bot.sendMessage(chat_id, 'Buenas, soy CineBot, ¿te apetece ir al cine? 📽🎞🍿🥤🎬', reply_markup=build_buttons(optionList, 'start' , 2))
+            if mensaje == '/start':
 
-        elif mensaje == '/buscarCine':
+                optionList = ['Si', 'No']
+                bot.sendMessage(chat_id, 'Buenas, soy CineBot, ¿te apetece ir al cine? 📽🎞🍿🥤🎬', reply_markup=build_buttons(optionList, 'start' , 2))
 
-            #aqui va la funcion que busca en la base de datos los cines
-            cine = ecartelera.getCines()
+            elif mensaje == '/buscarCine':
 
-            #envia lista de cines
-            bot.sendMessage(chat_id, '¿A qué cine te apetece ir?', reply_markup=build_buttons(cine, 'cine', 1))
+                #aqui va la funcion que busca en la base de datos los cines
+                cine = ecartelera.getCines()
 
-        elif '/buscarPelicula' in mensaje:
+                #envia lista de cines
+                bot.sendMessage(chat_id, '¿A qué cine te apetece ir?', reply_markup=build_buttons(cine, 'cine', 1))
 
-            # aqui va la funcion que busca en la base de datos peli[1] y return a lista de cine
-            peli = mensaje.split('/buscarPelicula')
-            found = True
+            elif '/buscarPelicula' in mensaje:
 
-            cineList = ['cine1', 'cine2', 'cine3', 'cine4']
+                # aqui va la funcion que busca en la base de datos peli[1] y return a lista de cine
+                peli = mensaje.split('/buscarPelicula')
+                found = True
 
-            if found:
-                bot.sendMessage(chat_id, 'Found it!')
+                cineList = ['cine1', 'cine2', 'cine3', 'cine4']
 
-                # envia lista de cine
-                bot.sendMessage(chat_id, 'Donde quieres ir?', reply_markup=build_buttons(cineList, 'cine', 2))
+                if found:
+                    bot.sendMessage(chat_id, 'Found it!')
 
+                    # envia lista de cine
+                    bot.sendMessage(chat_id, 'Donde quieres ir?', reply_markup=build_buttons(cineList, 'cine', 2))
+
+                else:
+                    bot.sendMessage(chat_id, 'No he encontrado ninguna peli ' + peli[0])
+                    bot.sendPhoto(chat_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
+
+
+            elif mensaje == '/cineCercano':
+
+                #recuperar la posicion del usuario
+                #recuperar los cines mas cercano en la base de datos y ponerlos en una lista (cineList)
+
+                bot.sendMessage(chat_id, 'Por favor, envianos tu localización')
+
+            elif mensaje == '/sugerirPelicula':
+
+                bot.sendMessage(chat_id, '/sugerirPelicula: Todavia da hacer!')
+
+
+            elif mensaje == '/help':
+
+                self.eviarComandos(chat_id)
             else:
-                bot.sendMessage(chat_id, 'No he encontrado ninguna peli ' + peli[0])
-                bot.sendPhoto(chat_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
 
+                bot.sendMessage(chat_id, 'Que quieres hacer?')
+                bot.sendPhoto(chat_id, 'http://blog.pianetadonna.it/l67/wp-content/uploads/2014/10/punto_di_domanda.jpg')
 
-        elif mensaje == '/cineCercano':
+    def eviarComandos(self, chat_id):
 
-            #recuperar la posicion del usuario
-            #recuperar los cines mas cercano en la base de datos y ponerlos en una lista (cineList)
+        bot.sendMessage(chat_id, 'Comandos:'
+                                 '\n /buscarCine - Usa este comando para ver la cartelera del cine que quieras.'
+                                 '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
+                                 '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.'
+                                 '\n /sugerirPelicula - Envia la informacion sobre una pelicula estrenada recientemente al azar.')
 
-            cineList = ['cine1', 'cine2', 'cine3', 'cine4']
-            bot.sendMessage(chat_id, 'Donde quieres ir?', reply_markup=build_buttons(cineList, 'cine', 2))
+    def handle_location(self, localizacion, msg, chat_id):
 
+        listaDatosCine = ecartelera.getCoordenadasCine()  # Lista de (Id y coordenadas) de todas los cines
+        listacinesCercanos = []
 
-        elif mensaje == '/sugerirPelicula':
+        latitudMes = localizacion['latitude']
+        longitudMes = localizacion['longitude']
 
-            bot.sendMessage(chat_id, '/sugerirPelicula: Todavia da hacer!')
+        pi = 3.14
+        radio = 6378.137
+        grado = math.pi / 180
+        latM = latitudMes * grado
+        longM = longitudMes * grado
 
+        for datosCine in listaDatosCine:
+            latitud1 = datosCine[0]  # del cine que buscamos
+            longitud1 = datosCine[1]  # del cine que buscamos
+            lat1 = latitud1 * grado
+            long1 = longitud1 * grado
+            dlong = long1 - longM
+            distancia = math.acos(
+                math.sin(lat1) * math.sin(latM) + math.cos(lat1) * math.cos(latM) * math.cos(dlong)) * radio
+            listacinesCercanos.append((distancia, datosCine[0], datosCine[1], datosCine[2]))
 
-        elif mensaje == '/help':
+        listacinesCercanos.sort()
 
-            bot.sendMessage(chat_id, 'Comandos:'
-                                     '\n /buscarCine - Usa este comando para ver la cartelera del cine que quieras.'
-                                     '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
-                                     '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.'
-                                     '\n /sugerirPelicula - Envia la informacion sobre una pelicula estrenada recientemente al azar.')
+        for cine in listacinesCercanos[:3]:
+            bot.sendLocation(chat_id, latitude=cine[1], longitude=cine[2]);
 
-        else:
-
-            bot.sendMessage(chat_id, 'Que quieres hacer?')
-            bot.sendPhoto(chat_id, 'http://blog.pianetadonna.it/l67/wp-content/uploads/2014/10/punto_di_domanda.jpg')
-
+            # bot.sendMessage(chat_id, reply_markup=build_buttonsCineCercano(cine[3],'cercano', 1))
+            print(cine)
+        self.eviarComandos(chat_id)
 
 #clase que gestiona los botones inchat
 class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
@@ -178,10 +217,12 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
             print ("Estas en elif infoPeli :" + str(info))
 
             infoRequest = info[6]
-            AQUI NECESITO EL NOMBRE DE LA PELICULA
+            #AQUI NECESITO EL NOMBRE DE LA PELICULA
+
+            nombrePelicula = ecartelera.getNombrePeliculaById(info[3])
 
             movie = Movies.movies.Movie(nombrePelicula)
-            
+
             #busca en la base de datos el atributo request de la peli
             
             if infoRequest == 'Director':
