@@ -25,10 +25,10 @@ from telepot.delegate import pave_event_space, per_chat_id, create_open, per_cal
 from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
 
 
-TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
+#TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM' # @cicinebotmaurizio
 #TOKEN = '581607975:AAG995XceTIs5DjdW70blkjF3__IGCKv2_w'  # @CicinebotPablo_bot
-# TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
+TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM'  # @CicinebotMaurizio_bot
 movieSelected = []
 
@@ -219,7 +219,9 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
 
             infoRequest = info[6]
 
-            movie = movieSelected[-1]
+            nombrePelicula = ecartelera.getNombrePeliculaById(info[3])
+            movie = Movies.movies.Movie(nombrePelicula)
+            #movie = movieSelected[-1]
                 # Movies.movies.Movie(movieSelected.movieName)
 
             #busca en la base de datos el atributo request de la peli
@@ -258,7 +260,7 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
 
             nombreCine = ecartelera.getNombreCineById(mensaje[1])
             nombrePelicula = ecartelera.getNombrePeliculaById(idPelicula)
-            bot.sendMessage(chat_id, 'Buscando la información de la película... Sea paciente')
+            bot.sendMessage(from_id, 'Buscando la información de la película... Sea paciente')
 
             movie = Movies.movies.Movie(nombrePelicula)
             movieSelected.append(movie)
