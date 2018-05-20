@@ -451,13 +451,13 @@ def borrarDatos():
     x.close()
     conn.close()
 
-#getCines()
+# getCines()
 
-#En fichero.txt están los enlaces a cada cine y el nombre de cada cines en una misma linea, separado por _
-#(nombreCine, enlaceCine) = leerCinesFichero("cinesLlenos.txt")
-#borrarDatos()
-#Es necesario cargar los cines una vez en la BBDD
-#cargarCinesEnBBDD(nombreCine, enlaceCine)
+# #En fichero.txt están los enlaces a cada cine y el nombre de cada cines en una misma linea, separado por _
+(nombreCine, enlaceCine) = leerCinesFichero("cinesLlenos.txt")
+borrarDatos()
+# #Es necesario cargar los cines una vez en la BBDD
+cargarCinesEnBBDD(nombreCine, enlaceCine)
 
 #url = 'https://www.ecartelera.com/cines/dreams-cinema-palacio-hielo/'
 #for url in enlaceCine:
