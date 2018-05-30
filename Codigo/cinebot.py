@@ -105,7 +105,7 @@ class UserHandler(telepot.helper.ChatHandler):
                 optionList = ['Si', 'No']
                 bot.sendMessage(chat_id, 'Buenas, soy CineBot, ¿te apetece ir al cine? 📽🎞🍿🥤🎬', reply_markup=build_buttons(optionList, 'start' , 2))
 
-            elif mensaje == '/buscarCine':
+            elif mensaje == '/buscarcine':
 
                 #aqui va la funcion que busca en la base de datos los cines
                 cine = ecartelera.getCines()
@@ -113,14 +113,14 @@ class UserHandler(telepot.helper.ChatHandler):
                 #envia lista de cines
                 bot.sendMessage(chat_id, '¿A qué cine te apetece ir?', reply_markup=build_buttons(cine, 'cine', 1))
 
-            elif '/buscarPelicula' in mensaje:
+            elif '/buscarpelicula' in mensaje:
 
                 # aqui va la funcion que busca en la base de datos peli[1] y return a lista de cine
-                peli = mensaje.split('/buscarPelicula ')
+                peli = mensaje.split('/buscarpelicula ')
 
-                if(peli[0] == '/buscarPelicula'):
+                if(peli[0] == '/buscarpelicula'):
 
-                    bot.sendMessage(chat_id, 'Para utilizar el comando añade: /buscarPelicula seguido del nombre de la película')
+                    bot.sendMessage(chat_id, 'Para utilizar el comando añade: /buscarpelicula seguido del nombre de la película')
                 else:
 
                     cineList = ecartelera.buscarPelicula(peli[1])
@@ -144,7 +144,7 @@ class UserHandler(telepot.helper.ChatHandler):
                         bot.sendPhoto(chat_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
 
 
-            elif mensaje == '/cineCercano':
+            elif mensaje == '/cinecercano':
 
                 #recuperar la posicion del usuario
                 #recuperar los cines mas cercano en la base de datos y ponerlos en una lista (cineList)
@@ -163,9 +163,9 @@ class UserHandler(telepot.helper.ChatHandler):
     def eviarComandos(self, chat_id):
 
         bot.sendMessage(chat_id, 'Comandos:'
-                                 '\n /buscarCine - Usa este comando para ver la cartelera del cine que quieras.'
-                                 '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines en los que se proyecta la pelicula.'
-                                 '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.')
+                                 '\n /buscarcine - Usa este comando para ver la cartelera del cine que quieras.'
+                                 '\n /buscarpelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines en los que se proyecta la pelicula.'
+                                 '\n /cinecercano - Busca los cines mas cercanos basandose en tu ubicacion.')
 
     def handle_location(self, localizacion, msg, chat_id):
 
@@ -225,9 +225,9 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
             bot.sendPhoto(from_id, 'http://www.smeraldocinema.it/public/file/Cinemacard4.jpg')
 
             bot.sendMessage(from_id, '\nSi quieres puedes utilizar uno de estos comandos:'
-                                     '\n /buscarCine - Usa este comando para ver la cartelera del cine elegido.'
-                                     '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines en los que se proyecta la pelicula.'
-                                     '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.')
+                                     '\n /buscarcine - Usa este comando para ver la cartelera del cine elegido.'
+                                     '\n /buscarpelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines en los que se proyecta la pelicula.'
+                                     '\n /cinecercano - Busca los cines mas cercanos basandose en tu ubicacion.')
 
         elif 'infoPeli' in query_data:
     
