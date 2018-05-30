@@ -13,6 +13,7 @@
 
 import sys
 import time
+from threading import Thread
 import urllib3
 import ecartelera
 import math
@@ -25,12 +26,14 @@ from telepot.delegate import pave_event_space, per_chat_id, create_open, per_cal
 from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
 
 
-TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
+#TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM' # @cicinebotmaurizio
 #TOKEN = '581607975:AAG995XceTIs5DjdW70blkjF3__IGCKv2_w'  # @CicinebotPablo_bot
-#TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
+TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM'  # @CicinebotMaurizio_bot
 movieSelected = []
+usersList = []
+
 
 
 def on_notify_message(msg):
@@ -85,6 +88,9 @@ class UserHandler(telepot.helper.ChatHandler):
         content_type, chat_type, chat_id = telepot.glance(msg)
         #print (content_type, chat_type, chat_id)
 
+        if chat_id not in usersList:
+            usersList.append(chat_id)
+
         if 'location' in msg.keys():
             localizacion = msg['location']
             print(localizacion)
@@ -110,21 +116,32 @@ class UserHandler(telepot.helper.ChatHandler):
             elif '/buscarPelicula' in mensaje:
 
                 # aqui va la funcion que busca en la base de datos peli[1] y return a lista de cine
-                peli = mensaje.split('/buscarPelicula')
-                found = True
-                cineList = ecartelera.buscarPelicula(peli[1])
+                peli = mensaje.split('/buscarPelicula ')
 
-                if found:
-                    bot.sendMessage(chat_id, 'La pelicula que has buscado está en los siguientes cines: ')
+                if(peli[0] == '/buscarPelicula'):
 
-                    # envia lista de cine
-                    for cine in cineList:
-                        bot.sendMessage(chat_id, cine)
-                        time.sleep(1)
-
+                    bot.sendMessage(chat_id, 'Para utilizar el comando añade: /buscarPelicula seguido del nombre de la película')
                 else:
-                    bot.sendMessage(chat_id, 'No he encontrado ninguna peli ' + peli[0])
-                    bot.sendPhoto(chat_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
+
+                    cineList = ecartelera.buscarPelicula(peli[1])
+
+                    if len(cineList) > 0:
+
+                        peliculaActual = None
+                        # envia lista de cine
+                        for cine in cineList:
+                            if(peliculaActual!= cine[1]):
+
+                                peliculaActual = cine[1]
+
+                                bot.sendMessage(chat_id, 'La pelicula' + cine[1] + ' que has buscado está en los siguientes cines: ')
+                                time.sleep(1)
+                            bot.sendMessage(chat_id, cine[0])
+                            time.sleep(1)
+
+                    else:
+                        bot.sendMessage(chat_id, 'No he encontrado ninguna peli ' + peli[0])
+                        bot.sendPhoto(chat_id, ('ciaktriste.jpg', open('ciaktriste.jpg', 'rb')))
 
 
             elif mensaje == '/cineCercano':
@@ -147,7 +164,7 @@ class UserHandler(telepot.helper.ChatHandler):
 
         bot.sendMessage(chat_id, 'Comandos:'
                                  '\n /buscarCine - Usa este comando para ver la cartelera del cine que quieras.'
-                                 '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
+                                 '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines en los que se proyecta la pelicula.'
                                  '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.')
 
     def handle_location(self, localizacion, msg, chat_id):
@@ -178,6 +195,7 @@ class UserHandler(telepot.helper.ChatHandler):
 
         for cine in listacinesCercanos[:3]:
             bot.sendLocation(chat_id, latitude=cine[1], longitude=cine[2]);
+            time.sleep(3)
 
             # bot.sendMessage(chat_id, reply_markup=build_buttonsCineCercano(cine[3],'cercano', 1))
             print(cine)
@@ -204,7 +222,7 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
 
             bot.sendMessage(from_id, '\nSi quieres puedes utilizar uno de estos comandos:'
                                      '\n /buscarCine - Usa este comando para ver la cartelera del cine elegido.'
-                                     '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
+                                     '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines en los que se proyecta la pelicula.'
                                      '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.')
 
         elif 'infoPeli' in query_data:
@@ -215,8 +233,11 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
             infoRequest = info[6]
 
             nombrePelicula = ecartelera.getNombrePeliculaById(info[3])
-            movie = Movies.movies.Movie(nombrePelicula)
-            #movie = movieSelected[-1]
+            #movie = Movies.movies.Movie(nombrePelicula)
+            for movies in movieSelected:
+                if movies.movieName == nombrePelicula:
+                    movie = movies
+
                 # Movies.movies.Movie(movieSelected.movieName)
 
             #busca en la base de datos el atributo request de la peli
@@ -309,5 +330,61 @@ bot = telepot.DelegatorBot(TOKEN, [
     ,
 ])
 
+
+# thread que verifica cada sleepTime segundos si hay nuevas películas en los cines
+# y en caso envía una notifación a los usuarios
+class ControlNotification(Thread):
+    def __init__(self, peliList, sleepTime):
+        Thread.__init__(self)
+        self.peliList = peliList
+        self.sleepTime = sleepTime
+
+    # controla si hay nuevas peliculas en el DB
+    def controlNews(self):
+
+        newListPeli = ecartelera.getIdPeliculas()
+        idNew = []
+        nombreNew = []
+        change = False
+
+        if self.peliList != newListPeli:
+            for id in newListPeli:
+                if id not in self.peliList:
+                    idNew.append(id)
+                    change = True
+
+        if change:
+            for id in idNew:
+                nombreNew.append(ecartelera.getNombrePeliculaById(id))
+            return nombreNew
+
+        else:
+            return None
+
+
+    # escribe las peliculas en una stringa de texto
+    def parseList(self, peli):
+        for p in peli:
+            str = "-" + p + "\n"
+        return str
+
+
+    def run(self):
+        while True:
+            news = self.controlNews()
+
+            if news is not None:
+                for chat_id in usersList:
+                    bot.sendMessage(chat_id, '💥¡NEWS!💥 \n¡Ha salido una nueva peli!📽🎞🍿🥤🎬\n ' + self.parseList(news))
+            else:
+                time.sleep(self.sleepTime)
+                # print("No change, sleep\n")
+
+            self.peliList = ecartelera.getIdPeliculas()
+            ecartelera.cargarPeliculaEnBBDD("La graduación de los españoles")
+
+
+controlThread = ControlNotification(ecartelera.getIdPeliculas(), 120)
+controlThread.start()
 
 bot.message_loop(run_forever='Listening ...')

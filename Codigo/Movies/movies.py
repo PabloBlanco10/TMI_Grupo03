@@ -60,17 +60,22 @@ class Movie:
 
     # Print some information.
     def getmovie(self):
-        self.searchmovie()
-        self.getinfofrommovie()
         translator = Translator()
 
         duracion = self.the_unt.get('runtime')
         valoracion = self.the_unt.get('rating')
-        sinopsis = self.the_unt.get('plot outline')
+        sinopsis = self.the_unt.get('synopsis')
+        if sinopsis != None:
+            sinopsis = str(self.the_unt.get('synopsis')[0])
+        else:
+            sinopsis = str(self.the_unt.get('plot outline'))
+        if sinopsis == None:
+            sinopsis = 'No information'
         director = self.the_unt.get('director')
         duracion = self.the_unt.get('runtime')
-        translation = translator.translate(sinopsis, dest='es')
-        sinopsis = translation.text
+        if sinopsis != None:
+            translation = translator.translate(sinopsis[0:2000], dest='es')
+            sinopsis = translation.text
         self.urlcartel = self.the_unt['cover url']
 
         generos = self.the_unt.get('genres')

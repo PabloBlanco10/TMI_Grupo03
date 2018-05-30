@@ -144,6 +144,30 @@ def cargarPeliculasEnBBDD(pelicula):
     x.close()
     conn.close()
 
+# function para cargar una pelicula
+def cargarPeliculaEnBBDD(nombrePeli):
+    conn = conecction()
+    x = conn.cursor()
+
+    p = nombrePeli.replace("'", "")
+    print(p)
+    if (buscarPeliEnBD(p) == False):
+        # p = str(MySQLdb.escape_string(p))
+        query = "INSERT IGNORE INTO Pelicula (nombre) VALUES ('{0}');".format(p)
+
+        try:
+            print(query)
+            x.execute(query)
+        except MySQLdb.ProgrammingError:
+            print("La siguiente query ha fallado:%s" % query + '\n')
+        print("La pelicula " + str(p) + " ha sido añadida.")
+
+    # print (pelicula)
+
+    conn.commit()
+    x.close()
+    conn.close()
+
 def getClaveCine(nombreCine):
     conn = conecction()
     x = conn.cursor()
@@ -238,6 +262,32 @@ def getIdCine(nombre):
     conn.close()
 
     return resultados[0]
+
+# Devuelve los ids de las peliculas
+def getIdPeliculas():
+    conn = conecction()
+    x = conn.cursor()
+    resultados = []
+
+    query = "SELECT id FROM Pelicula ORDER BY id;"
+
+    try:
+        x.execute(query)
+
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    k = 0
+
+    for i in x:
+        resultados.append(i[0])
+        k = k + 1
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados
 
 # Devuelve las películas que hay en un cine concreto.
 def getPeliculasEnCine(nombreCine):
@@ -345,6 +395,29 @@ def getCoordenadasCine():
 def getNombrePeliculaById(id):
     conn = conecction()
     x = conn.cursor()
+    resultados = []
+
+    query = "SELECT nombre FROM Pelicula WHERE id = '{0}';".format(id);
+    print(query)
+    try:
+        x.execute(query)
+
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    k = 0
+    for i in x:
+        resultados.append(i[0])
+
+    conn.commit()
+    x.close()
+    conn.close()
+
+    return resultados[0]
+
+def getNombrePeliculaById(id):
+    conn = conecction()
+    x = conn.cursor()
     resultados =[]
     
     query = "SELECT nombre FROM Pelicula WHERE id = '{0}';" .format(id);
@@ -395,9 +468,9 @@ def buscarPelicula(nombre):
     x = conn.cursor()
     resultados = []
     pelicula = nombre.replace("'", "")
-
-    query = "SELECT DISTINCT c.nombre FROM Cine as c, Pases as pa, Pelicula as p WHERE p.nombre like'%{0}%' " \
-            "AND c.enlace = pa.nombreCine AND p.id = pa.idPelicula;".format(pelicula);
+    print(nombre)
+    query = "SELECT DISTINCT c.nombre, p.nombre FROM Cine as c, Pases as pa, Pelicula as p WHERE p.nombre like'%{0}%' " \
+            "AND c.enlace = pa.nombreCine AND p.id = pa.idPelicula ORDER BY p.nombre;".format(pelicula);
     print(query)
     try:
         x.execute(query)
@@ -407,7 +480,7 @@ def buscarPelicula(nombre):
 
     k = 0
     for i in x:
-        resultados.append(i[0])
+        resultados.append([i[0], i[1]])
 
     conn.commit()
     x.close()
@@ -480,14 +553,14 @@ def borrarDatos():
 # getCines()
 
 # #En fichero.txt están los enlaces a cada cine y el nombre de cada cines en una misma linea, separado por _
-(nombreCine, enlaceCine) = leerCinesFichero("cinesLlenos.txt")
-borrarDatos()
+#(nombreCine, enlaceCine) = leerCinesFichero("cinesLlenos.txt")
+#borrarDatos()
 # #Es necesario cargar los cines una vez en la BBDD
 #cargarCinesEnBBDD(nombreCine, enlaceCine)
 
 #url = 'https://www.ecartelera.com/cines/dreams-cinema-palacio-hielo/'
-for url in enlaceCine:
-    buscarPeliculaEnCine(url)
+#for url in enlaceCine:
+#    buscarPeliculaEnCine(url)
 
 
 
