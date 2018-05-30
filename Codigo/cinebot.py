@@ -25,10 +25,10 @@ from telepot.delegate import pave_event_space, per_chat_id, create_open, per_cal
 from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
 
 
-#TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
+TOKEN = '556801610:AAEDqKjjIZkWCJzARY_DwwIHzBoGjCImKZM'  # @Cicinebot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM' # @cicinebotmaurizio
 #TOKEN = '581607975:AAG995XceTIs5DjdW70blkjF3__IGCKv2_w'  # @CicinebotPablo_bot
-TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
+#TOKEN = '574044701:AAHVro7hwe2YQ-VHXcXb5cVQJP1CYxyo5AE'  # @CicinebotMaria_bot
 #TOKEN = '551454537:AAHZ_VFOqHqQO0lLMGtzJi0XsCYo5cCxvrM'  # @CicinebotMaurizio_bot
 movieSelected = []
 
@@ -112,14 +112,15 @@ class UserHandler(telepot.helper.ChatHandler):
                 # aqui va la funcion que busca en la base de datos peli[1] y return a lista de cine
                 peli = mensaje.split('/buscarPelicula')
                 found = True
-
-                cineList = ['cine1', 'cine2', 'cine3', 'cine4']
+                cineList = ecartelera.buscarPelicula(peli[1])
 
                 if found:
-                    bot.sendMessage(chat_id, 'Found it!')
+                    bot.sendMessage(chat_id, 'La pelicula que has buscado está en los siguientes cines: ')
 
                     # envia lista de cine
-                    bot.sendMessage(chat_id, 'Donde quieres ir?', reply_markup=build_buttons(cineList, 'cine', 2))
+                    for cine in cineList:
+                        bot.sendMessage(chat_id, cine)
+                        time.sleep(1)
 
                 else:
                     bot.sendMessage(chat_id, 'No he encontrado ninguna peli ' + peli[0])
@@ -132,10 +133,6 @@ class UserHandler(telepot.helper.ChatHandler):
                 #recuperar los cines mas cercano en la base de datos y ponerlos en una lista (cineList)
 
                 bot.sendMessage(chat_id, 'Por favor, envianos tu localización')
-
-            elif mensaje == '/sugerirPelicula':
-
-                bot.sendMessage(chat_id, '/sugerirPelicula: Todavia da hacer!')
 
 
             elif mensaje == '/help':
@@ -151,8 +148,7 @@ class UserHandler(telepot.helper.ChatHandler):
         bot.sendMessage(chat_id, 'Comandos:'
                                  '\n /buscarCine - Usa este comando para ver la cartelera del cine que quieras.'
                                  '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
-                                 '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.'
-                                 '\n /sugerirPelicula - Envia la informacion sobre una pelicula estrenada recientemente al azar.')
+                                 '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.')
 
     def handle_location(self, localizacion, msg, chat_id):
 
@@ -209,8 +205,7 @@ class ButtonHandler(telepot.helper.CallbackQueryOriginHandler):
             bot.sendMessage(from_id, '\nSi quieres puedes utilizar uno de estos comandos:'
                                      '\n /buscarCine - Usa este comando para ver la cartelera del cine elegido.'
                                      '\n /buscarPelicula - Usa este comando seguido del nombre de una pelicula para buscar los cines mas cercanos en los que se proyecta la pelicula.'
-                                     '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.'
-                                     '\n /sugerirPelicula - Envia la informacion sobre una pelicula estrenada recientemente al azar.')
+                                     '\n /cineCercano - Busca los cines mas cercanos basandose en tu ubicacion.')
 
         elif 'infoPeli' in query_data:
     

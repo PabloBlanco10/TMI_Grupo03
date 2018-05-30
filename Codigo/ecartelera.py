@@ -389,6 +389,32 @@ def getIdPelicula(pelicula):
     print (resultados)
     return resultados[0]
 
+
+def buscarPelicula(nombre):
+    conn = conecction()
+    x = conn.cursor()
+    resultados = []
+    pelicula = nombre.replace("'", "")
+
+    query = "SELECT DISTINCT c.nombre FROM Cine as c, Pases as pa, Pelicula as p WHERE p.nombre like'%{0}%' " \
+            "AND c.enlace = pa.nombreCine AND p.id = pa.idPelicula;".format(pelicula);
+    print(query)
+    try:
+        x.execute(query)
+
+    except MySQLdb.ProgrammingError:
+        print("La siguiente query ha fallado: " + query + '\n')
+
+    k = 0
+    for i in x:
+        resultados.append(i[0])
+
+    conn.commit()
+    x.close()
+    conn.close()
+    print(resultados)
+    return resultados
+
 def buscarPeliculaEnCine(url):
     pelicula = list()
     peliculaPase =dict()
@@ -440,28 +466,28 @@ def borrarDatos():
         print("La siguiente query ha fallado: " + query + '\n')
 
     conn.commit()
-    query2 = "DELETE FROM Cine;"
+   # query2 = "DELETE FROM Cine;"
 
-    try:
-        x.execute(query2)
-    except MySQLdb.ProgrammingError:
-        print("La siguiente query ha fallado: " + query + '\n')
+    #try:
+    #    x.execute(query2)
+    #except MySQLdb.ProgrammingError:
+    #    print("La siguiente query ha fallado: " + query + '\n')
 
-    conn.commit()
+    #conn.commit()
     x.close()
     conn.close()
 
 # getCines()
 
 # #En fichero.txt están los enlaces a cada cine y el nombre de cada cines en una misma linea, separado por _
-#(nombreCine, enlaceCine) = leerCinesFichero("cinesLlenos.txt")
-#borrarDatos()
+(nombreCine, enlaceCine) = leerCinesFichero("cinesLlenos.txt")
+borrarDatos()
 # #Es necesario cargar los cines una vez en la BBDD
 #cargarCinesEnBBDD(nombreCine, enlaceCine)
 
 #url = 'https://www.ecartelera.com/cines/dreams-cinema-palacio-hielo/'
-#for url in enlaceCine:
-#    buscarPeliculaEnCine(url)
+for url in enlaceCine:
+    buscarPeliculaEnCine(url)
 
 
 
