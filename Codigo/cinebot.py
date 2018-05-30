@@ -182,9 +182,13 @@ class UserHandler(telepot.helper.ChatHandler):
 
         for cine in listacinesCercanos[:3]:
             bot.sendLocation(chat_id, latitude=cine[1], longitude=cine[2]);
+            bot.sendMessage(chat_id, "Esta es la ubicación del cine: " + ecartelera.getNombreCineById(cine[3]))
 
             # bot.sendMessage(chat_id, reply_markup=build_buttonsCineCercano(cine[3],'cercano', 1))
             print(cine)
+            time.sleep(3)
+
+        bot.sendMessage(chat_id, "¿Qué quieres hacer ahora?  📽🎞🍿🥤🎬")
         self.eviarComandos(chat_id)
 
 #clase que gestiona los botones inchat
